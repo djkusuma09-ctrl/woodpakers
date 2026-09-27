@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Katalog Penjualan Interaktif</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #090d16;
+            color: #7dd3fc;
+        }
+        /* Custom scrollbar style */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #0284c7;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #38bdf8;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col bg-slate-950 text-sky-300 selection:bg-sky-500 selection:text-white">
+
+    <!-- Header Navbar -->
+    <header class="sticky top-0 z-40 bg-slate-900/90 backdrop-blur-md border-b border-sky-900/40 px-4 lg:px-8 py-4">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center space-x-3.5">
+                <!-- Dynamic Store Logo / Icon Container -->
+                <div id="store-logo-container" class="w-12 h-12 rounded-xl bg-sky-500/10 border border-sky-500/30 flex items-center justify-center overflow-hidden shrink-0 shadow-lg shadow-sky-500/5">
+                    <i id="default-store-icon" class="fa-solid fa-store text-2xl text-sky-400"></i>
+                    <img id="custom-store-logo" src="" alt="Logo Toko" class="w-full h-full object-cover hidden">
+                </div>
+                <div>
+                    <h1 id="nav-store-title" class="text-xl font-bold text-sky-400 tracking-tight leading-tight">Katalog Toko</h1>
+                    <p class="text-xs text-sky-200/60">Kelola & Jual Produk Anda</p>
+                </div>
+            </div>
+
+            <!-- Action Buttons in Header -->
+            <div class="flex items-center gap-3 w-full sm:w-auto justify-end">
+                <button onclick="openHeaderModal()" class="flex-1 sm:flex-initial px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-sky-300 border border-sky-700/50 rounded-xl text-sm font-medium transition duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-sky-500/10">
+                    <i class="fa-solid fa-pen-to-square"></i> Edit Info & Logo Toko
+                </button>
+                <button onclick="openProductModal()" class="flex-1 sm:flex-initial px-4 py-2.5 bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold rounded-xl text-sm transition duration-200 flex items-center justify-center gap-2 shadow-lg shadow-sky-500/20">
+                    <i class="fa-solid fa-plus"></i> Tambah Produk
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 lg:px-8 py-8 space-y-8">
+        <!-- Hero / Header Information Section -->
+        <section class="relative overflow-hidden rounded-3xl bg-gradient-to-b from-slate-900 to-slate-950 border border-sky-900/50 p-6 md:p-10 shadow-2xl">
+            <div class="absolute -top-24 -right-24 w-72 h-72 bg-sky-500/10 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="relative z-10 max-w-3xl space-y-4">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-sky-500/10 text-sky-400 border border-sky-500/20">
+                    <i class="fa-solid fa-sparkles"></i> Toko Resmi
+                </span>
+                <h2 id="display-main-title" class="text-3xl md:text-5xl font-extrabold text-sky-200 tracking-tight leading-tight">
+                    Selamat Datang di Katalog Kami
+                </h2>
+                <h3 id="display-subtitle" class="text-lg md:text-xl font-medium text-sky-400/90">
+                    Temukan Produk-Produk Berkualitas Terbaik
+                </h3>
+                <p id="display-description" class="text-sky-100/70 text-sm md:text-base leading-relaxed whitespace-pre-line">
+                    Kami menyediakan berbagai macam produk pilihan berkualitas tinggi dengan harga terjangkau. Silakan pilih produk yang Anda inginkan dan klik tombol pesan untuk langsung terhubung dengan admin kami melalui WhatsApp.
+                </p>
+                
+                <div class="pt-2 flex items-center text-xs text-sky-400/70 gap-2">
+                    <i class="fa-solid fa-circle-info"></i>
+                    <span>Teks judul, logo, dan keterangan toko di atas dapat Anda sesuaikan kapan saja.</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Search and Filter Bar -->
+        <section class="flex flex-col sm:flex-row items-center justify-between gap-4 bg-slate-900/60 p-4 rounded-2xl border border-sky-900/30">
+            <div class="relative w-full sm:w-80">
+                <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-sky-500/60"></i>
+                <input type="text" id="search-input" oninput="handleSearch()" placeholder="Cari nama atau deskripsi produk..." class="w-full pl-10 pr-4 py-2.5 bg-slate-950 border border-sky-900/60 rounded-xl text-sky-200 text-sm placeholder-sky-600 focus:outline-none focus:border-sky-400 transition">
+            </div>
+            <div class="text-xs text-sky-400/80 font-medium w-full sm:w-auto text-right">
+                Menampilkan <span id="product-count" class="text-sky-300 font-bold">0</span> produk
+            </div>
+        </section>
+
+        <!-- Product Grid Section -->
+        <section>
+            <div id="product-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Product cards will be injected here dynamically -->
+            </div>
+
+            <!-- Empty State Container -->
+            <div id="empty-state" class="hidden flex-col items-center justify-center py-16 text-center bg-slate-900/30 rounded-3xl border border-dashed border-sky-900/40">
+                <div class="p-4 bg-slate-900 rounded-full border border-sky-800/50 mb-3 text-sky-400 text-3xl">
+                    <i class="fa-solid fa-box-open"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-sky-200">Belum Ada Produk</h3>
+                <p class="text-sm text-sky-400/60 max-w-sm mt-1">Produk tidak ditemukan atau belum ditambahkan. Klik tombol "Tambah Produk" untuk mulai menambahkan produk Anda.</p>
+                <button onclick="openProductModal()" class="mt-4 px-4 py-2 bg-sky-500/20 border border-sky-500/40 text-sky-300 hover:bg-sky-500/30 rounded-xl text-sm font-medium transition">
+                    + Tambah Produk Baru
+                </button>
+            </div>
+        </section>
+    </main>
+
+    <footer class="mt-auto border-t border-sky-900/40 bg-slate-950 py-6 px-4 text-center text-xs text-sky-500/60">
+        <p>© <span id="year"></span> <span id="footer-store-name">Katalog Toko</span>. Seluruh hak cipta dilindungi.</p>
+    </footer>
+
+    <!-- MODAL 1: Edit Header / Toko Info & Logo -->
+    <div id="header-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 hidden">
+        <div class="bg-slate-900 border border-sky-800/60 rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+            <div class="flex items-center justify-between px-6 py-4 border-b border-sky-900/50 bg-slate-950/50">
+                <h3 class="text-lg font-semibold text-sky-300 flex items-center gap-2">
+                    <i class="fa-solid fa-sliders text-sky-400"></i> Pengaturan Toko & Logo
+                </h3>
+                <button onclick="closeHeaderModal()" class="text-sky-500 hover:text-sky-200 text-lg transition">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            
+            <form id="header-form" onsubmit="saveHeaderData(event)" class="p-6 space-y-4 overflow-y-auto flex-1">
+                <!-- Section Logo Pemilik Toko -->
+                <div class="p-4 bg-slate-950/80 rounded-2xl border border-sky-900/60 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <label class="block text-xs font-semibold text-sky-400 uppercase tracking-wider">Logo Pemilik Toko</label>
+                        <button type="button" onclick="removeLogo()" id="btn-remove-logo" class="text-xs text-red-400 hover:text-red-300 hidden flex items-center gap-1">
+                            <i class="fa-solid fa-trash-can"></i> Hapus Logo
+                        </button>
+                    </div>
+
+                    <!-- Switch Tab Logo -->
+                    <div class="grid grid-cols-2 gap-2 p-1 bg-slate-900 border border-sky-900 rounded-xl">
+                        <button type="button" id="btn-logo-type-file" onclick="switchLogoInputType('file')" class="py-1.5 text-xs font-semibold rounded-lg bg-sky-500 text-slate-950 transition">Upload File Logo</button>
+                        <button type="button" id="btn-logo-type-url" onclick="switchLogoInputType('url')" class="py-1.5 text-xs font-semibold rounded-lg text-sky-400 hover:text-sky-200 transition">URL Gambar Logo</button>
+                    </div>
+
+                    <!-- File Logo Input -->
+                    <div id="container-logo-file">
+                        <input type="file" id="input-logo-file" accept="image/*" class="w-full px-3 py-2 bg-slate-900 border border-sky-900 rounded-xl text-sky-200 text-sm focus:outline-none focus:border-sky-400 file:mr-4 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-sky-500 file:text-slate-950 hover:file:bg-sky-400" onchange="handleLogoFileUpload(event)">
+                    </div>
+
+                    <!-- URL Logo Input -->
+                    <div id="container-logo-url" class="hidden">
+                        <input type="url" id="input-logo-url" placeholder="https://example.com/logo.png" class="w-full px-4 py-2.5 bg-slate-900 border border-sky-900 rounded-xl text-sky-200 text-sm focus:outline-none focus:border-sky-400" onchange="previewLogoFromUrl()">
+                    </div>
+
+                    <!-- Pratinjau Logo -->
+                    <div class="flex items-center gap-3 pt-1">
+                        <span class="text-xs text-sky-400/80">Pratinjau Logo:</span>
+                        <div class="w-12 h-12 rounded-xl bg-slate-900 border border-sky-800 flex items-center justify-center overflow-hidden">
+                            <i id="modal-logo-default-icon" class="fa-solid fa-store text-sky-500 text-xl"></i>
+                            <img id="modal-logo-preview" src="" alt="Preview Logo" class="w-full h-full object-cover hidden">
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-sky-400 uppercase tracking-wider mb-1">Judul Utama Halaman</label>
+                    <input type="text" id="input-main-title" required class="w-full px-4 py-2.5 bg-slate-950 border border-sky-900 rounded-xl text-sky-200 text-sm focus:outline-none focus:border-sky-400">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-sky-400 uppercase tracking-wider mb-1">Subjudul Halaman</label>
+                    <input type="text" id="input-subtitle" required class="w-full px-4 py-2.5 bg-slate-950 border border-sky-900 rounded-xl text-sky-200 text-sm focus:outline-none focus:border-sky-400">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-sky-400 uppercase tracking-wider mb-1">Keterangan / Deskripsi Penjualan Toko</label>
+                    <textarea id="input-description" rows="3" required class="w-full px-4 py-2.5 bg-slate-950 border border-sky-900 rounded-xl text-sky-200 text-sm focus:outline-none focus:border-sky-400"></textarea>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-sky-400 uppercase tracking-wider mb-1">Nomor WhatsApp Penjual (Opsional)</label>
+                    <input type="text" id="input-whatsapp" placeholder="Contoh: 628123456789" class="w-full px-4 py-2.5 bg-slate-950 border border-sky-900 rounded-xl text-sky-200 text-sm focus:outline-none focus:border-sky-400">
+                    <p class="text-[10px] text-sky-500/70 mt-1">Gunakan format internasional tanpa tanda + (contoh: 6281234567890)</p>
+                </div>
+
+                <div class="flex justify-end gap-3 pt-4 border-t border-sky-900/40">
+                    <button type="button" onclick="closeHeaderModal()" class="px-4 py-2 text-sm text-sky-400 hover:text-sky-200">Batal</button>
+                    <button type="submit" class="px-5 py-2 bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold rounded-xl text-sm transition">Simpan Perubahan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL 2: Add / Edit Product -->
+    <div id="product-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 hidden">
+        <div class="bg-slate-900 border border-sky-800/60 rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl max-h-[90vh] flex flex-col">
+            <div class="flex items-center justify-between px-6 py-4 border-b border-sky-900/50 bg-slate-950/50">
+                <h3 id="product-modal-title" class="text-lg font-semibold text-sky-300 flex items-center gap-2">
+                    <i class="fa-solid fa-box text-sky-400"></i> Tambah Produk Baru
+                </h3>
+                <button onclick="closeProductModal()" class="text-sky-500 hover:text-sky-200 text-lg transition">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            
+            <form id="product-form" onsubmit="saveProductData(event)" class="p-6 space-y-4 overflow-y-auto flex-1">
+                <input type="hidden" id="input-product-id">
+                
+                <!-- Image Mode Selector -->
+                <div>
+                    <label class="block text-xs font-semibold text-sky-400 uppercase tracking-wider mb-2">Sumber Gambar Produk</label>
+                    <div class="grid grid-cols-2 gap-2 p-1 bg-slate-950 border border-sky-900 rounded-xl mb-3">
+                        <button type="button" id="btn-img-url" onclick="switchImageInputType('url')" class="py-1.5 text-xs font-semibold rounded-lg bg-sky-500 text-slate-950 transition">URL Gambar</button>
+                        <button type="button" id="btn-img-file" onclick="switchImageInputType('file')" class="py-1.5 text-xs font-semibold rounded-lg text-sky-400 hover:text-sky-200 transition">Upload File</button>
+                    </div>
+
+                    <!-- Input URL -->
+                    <div id="container-img-url">
+                        <input type="url" id="input-product-image-url" placeholder="https://example.com/gambar.jpg" class="w-full px-4 py-2.5 bg-slate-950 border border-sky-900 rounded-xl text-sky-200 text-sm focus:outline-none focus:border-sky-400" onchange="previewImageSrc()">
+                    </div>
+
+                    <!-- Input File Upload -->
+                    <div id="container-img-file" class="hidden">
+                        <input type="file" id="input-product-image-file" accept="image/*" class="w-full px-3 py-2 bg-slate-950 border border-sky-900 rounded-xl text-sky-200 text-sm focus:outline-none focus:border-sky-400 file:mr-4 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-sky-500 file:text-slate-950 hover:file:bg-sky-400" onchange="handleFileUpload(event)">
+                    </div>
+
+                    <!-- Preview Image Thumbnail -->
+                    <div class="mt-3">
+                        <p class="text-[11px] text-sky-400/80 mb-1">Pratinjau Gambar:</p>
+                        <div class="h-36 w-full rounded-xl bg-slate-950 border border-sky-900 flex items-center justify-center overflow-hidden">
+                            <img id="image-preview" src="" alt="Pratinjau Gambar" class="w-full h-full object-cover hidden" onerror="this.classList.add('hidden'); document.getElementById('preview-placeholder').classList.remove('hidden');">
+                            <div id="preview-placeholder" class="text-sky-600 text-xs flex flex-col items-center">
+                                <i class="fa-regular fa-image text-2xl mb-1"></i>
+                                <span>Belum ada gambar</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-sky-400 uppercase tracking-wider mb-1">Judul / Nama Produk</label>
+                    <input type="text" id="input-product-title" placeholder="Contoh: Sepatu Sneakers Premium" required class="w-full px-4 py-2.5 bg-slate-950 border border-sky-900 rounded-xl text-sky-200 text-sm focus:outline-none focus:border-sky-400">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-sky-400 uppercase tracking-wider mb-1">Keterangan / Deskripsi Produk</label>
+                    <textarea id="input-product-description" rows="3" placeholder="Tuliskan keterangan detail mengenai bahan, ukuran, keunggulan produk..." required class="w-full px-4 py-2.5 bg-slate-950 border border-sky-900 rounded-xl text-sky-200 text-sm focus:outline-none focus:border-sky-400"></textarea>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-sky-400 uppercase tracking-wider mb-1">Harga (Rp)</label>
+                    <input type="number" id="input-product-price" placeholder="Contoh: 150000" required class="w-full px-4 py-2.5 bg-slate-950 border border-sky-900 rounded-xl text-sky-200 text-sm focus:outline-none focus:border-sky-400">
+                </div>
+
+                <div class="flex justify-end gap-3 pt-4 border-t border-sky-900/40">
+                    <button type="button" onclick="closeProductModal()" class="px-4 py-2 text-sm text-sky-400 hover:text-sky-200">Batal</button>
+                    <button type="submit" class="px-5 py-2 bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold rounded-xl text-sm transition">Simpan Produk</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Data Store Keys
+        const STORAGE_HEADER_KEY = 'KATALOG_HEADER_DATA_V2';
+        const STORAGE_PRODUCTS_KEY = 'KATALOG_PRODUCTS_DATA_V1';
+
+        // Default Initial Data
+        const defaultHeaderData = {
+            mainTitle: 'Katalog Produk Pilihan',
+            subtitle: 'Koleksi Barang Terpopuler & Berkualitas',
+            description: 'Selamat datang di toko kami! Jelajahi berbagai katalog produk unggulan kami di bawah ini. Anda dapat melakukan pemesanan langsung secara cepat dan mudah via WhatsApp.',
+            whatsapp: '6281234567890',
+            logo: '' // Base64 or Image URL
+        };
+
+        const defaultProducts = [
+            {
+                id: '1',
+                title: 'Jam Tangan Digital Sport',
+                description: 'Jam tangan tahan air dengan fitur chronograph, alarm, dan LED backlight. Cocok untuk aktivitas luar ruangan dan olahraga harian.',
+                price: 250000,
+                image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&auto=format&fit=crop&q=80'
+            },
+            {
+                id: '2',
+                title: 'Wireless Headphone Bass Boost',
+                description: 'Nikmati audio jernih dengan bass yang dalam. Baterai tahan hingga 30 jam pemakaian non-stop dengan koneksi Bluetooth 5.2.',
+                price: 499000,
+                image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&auto=format&fit=crop&q=80'
+            },
+            {
+                id: '3',
+                title: 'Ransel Casual Waterproof',
+                description: 'Tas ransel modern berbahan nylon tahan air. Memiliki kompartemen khusus laptop 15 inci dan berbagai kantong penyimpanan praktis.',
+                price: 185000,
+                image: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=600&auto=format&fit=crop&q=80'
+            }
+        ];
+
+        // Global State Variables
+        let headerData = {};
+        let products = [];
+        let currentImageType = 'url'; // 'url' or 'file' for product
+        let currentBase64Image = '';
+        let tempModalLogo = ''; // Temporary logo storage for modal
+        let currentLogoInputType = 'file'; // 'file' or 'url' for logo
+
+        // Initialize App on DOM Loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('year').textContent = new Date().getFullYear();
+            loadStoredData();
+            renderHeader();
+            renderProducts();
+        });
+
+        // Load Data from LocalStorage
+        function loadStoredData() {
+            const savedHeader = localStorage.getItem(STORAGE_HEADER_KEY);
+            headerData = savedHeader ? JSON.parse(savedHeader) : defaultHeaderData;
+
+            const savedProducts = localStorage.getItem(STORAGE_PRODUCTS_KEY);
+            products = savedProducts ? JSON.parse(savedProducts) : defaultProducts;
+        }
+
+        // Render Page Header & Logo
+        function renderHeader() {
+            document.getElementById('display-main-title').textContent = headerData.mainTitle;
+            document.getElementById('display-subtitle').textContent = headerData.subtitle;
+            document.getElementById('display-description').textContent = headerData.description;
+            document.getElementById('nav-store-title').textContent = headerData.mainTitle;
+            document.getElementById('footer-store-name').textContent = headerData.mainTitle;
+
+            // Render Header Logo
+            const defaultIcon = document.getElementById('default-store-icon');
+            const customLogo = document.getElementById('custom-store-logo');
+
+            if (headerData.logo) {
+                customLogo.src = headerData.logo;
+                customLogo.classList.remove('hidden');
+                defaultIcon.classList.add('hidden');
+            } else {
+                customLogo.classList.add('hidden');
+                defaultIcon.classList.remove('hidden');
+            }
+        }
+
+        // Render Product Cards Grid
+        function renderProducts(filterKeyword = '') {
+            const grid = document.getElementById('product-grid');
+            const emptyState = document.getElementById('empty-state');
+            grid.innerHTML = '';
+
+            const filteredProducts = products.filter(p => 
+                p.title.toLowerCase().includes(filterKeyword.toLowerCase()) || 
+                p.description.toLowerCase().includes(filterKeyword.toLowerCase())
+            );
+
+            document.getElementById('product-count').textContent = filteredProducts.length;
+
+            if (filteredProducts.length === 0) {
+                grid.classList.add('hidden');
+                emptyState.classList.remove('hidden');
+                emptyState.classList.add('flex');
+                return;
+            }
+
+            grid.classList.remove('hidden');
+            emptyState.classList.add('hidden');
+            emptyState.classList.remove('flex');
+
+            filteredProducts.forEach(product => {
+                const card = document.createElement('div');
+                card.className = 'group flex flex-col bg-slate-900 border border-sky-900/40 rounded-2xl overflow-hidden hover:border-sky-500/50 hover:shadow-xl hover:shadow-sky-500/10 transition-all duration-300';
+                
+                const formattedPrice = new Intl.NumberFormat('id-ID', {
+                    style: 'currency',
+                    currency: 'IDR',
+                    maximumFractionDigits: 0
+                }).format(product.price);
+
+                const waMessage = encodeURIComponent(`Halo, saya tertarik untuk membeli produk *${product.title}* seharga ${formattedPrice}. Mohon informasi ketersediaannya.`);
+                const waNumber = headerData.whatsapp ? headerData.whatsapp.replace(/[^0-9]/g, '') : '';
+                const waLink = waNumber ? `https://wa.me/${waNumber}?text=${waMessage}` : '#';
+
+                // TATA LETAK:
+                // 1. Gambar di paling atas
+                // 2. Judul di bawah gambar
+                // 3. Keterangan di bawah judul
+                // 4. Harga & aksi di bagian paling bawah
+                card.innerHTML = `
+                    <!-- 1. GAMBAR PRODUK (Paling Atas) -->
+                    <div class="relative w-full h-56 bg-slate-950 overflow-hidden border-b border-sky-900/30">
+                        <img src="${product.image}" alt="${escapeHtml(product.title)}" 
+                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                             onerror="this.onerror=null; this.src='https://placehold.co/600x400/0f172a/38bdf8?text=Gambar+Tidak+Tersedia';">
+                        <div class="absolute inset-0 bg-gradient-to-t from-slate-950/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    </div>
+
+                    <!-- KONTEN KARTU -->
+                    <div class="p-5 flex-1 flex flex-col justify-between space-y-4">
+                        <div class="space-y-2">
+                            <!-- 2. JUDUL PRODUK (Di Bawah Gambar) -->
+                            <h3 class="text-lg font-bold text-sky-200 group-hover:text-sky-400 transition-colors line-clamp-2">
+                                ${escapeHtml(product.title)}
+                            </h3>
+
+                            <!-- 3. KETERANGAN / DESKRIPSI PRODUK (Di Bawah Judul) -->
+                            <p class="text-sky-100/70 text-xs sm:text-sm leading-relaxed whitespace-pre-line line-clamp-3">
+                                ${escapeHtml(product.description)}
+                            </p>
+                        </div>
+
+                        <!-- 4. HARGA DAN TOMBOL AKSI (Bagian Bawah) -->
+                        <div class="pt-3 border-t border-sky-900/40 space-y-3">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs text-sky-400/70">Harga:</span>
+                                <span class="text-lg font-extrabold text-sky-300 tracking-tight">${formattedPrice}</span>
+                            </div>
+
+                            <div class="flex items-center gap-2">
+                                <!-- Tombol Beli WhatsApp -->
+                                <a href="${waLink}" target="_blank" rel="noopener noreferrer" 
+                                   class="flex-1 px-3 py-2.5 bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 transition shadow-md shadow-sky-500/10">
+                                    <i class="fa-brands fa-whatsapp text-sm"></i> Beli Sekarang
+                                </a>
+
+                                <!-- Tombol Edit -->
+                                <button onclick="openProductModal('${product.id}')" title="Edit Produk" 
+                                        class="p-2.5 bg-slate-800 hover:bg-slate-700 text-sky-400 border border-sky-800/60 rounded-xl transition">
+                                    <i class="fa-solid fa-pen-to-square"></i>
+                                </button>
+
+                                <!-- Tombol Hapus -->
+                                <button onclick="deleteProduct('${product.id}')" title="Hapus Produk" 
+                                        class="p-2.5 bg-red-950/40 hover:bg-red-900/60 text-red-400 border border-red-900/50 rounded-xl transition">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // Live Search Handling
+        function handleSearch() {
+            const keyword = document.getElementById('search-input').value;
+            renderProducts(keyword);
+        }
+
+        // Header / Logo Modal Logic
+        function openHeaderModal() {
+            document.getElementById('input-main-title').value = headerData.mainTitle;
+            document.getElementById('input-subtitle').value = headerData.subtitle;
+            document.getElementById('input-description').value = headerData.description;
+            document.getElementById('input-whatsapp').value = headerData.whatsapp || '';
+            
+            tempModalLogo = headerData.logo || '';
+            switchLogoInputType('file');
+            updateModalLogoPreview();
+
+            document.getElementById('header-modal').classList.remove('hidden');
+        }
+
+        function closeHeaderModal() {
+            document.getElementById('header-modal').classList.add('hidden');
+        }
+
+        function switchLogoInputType(type) {
+            currentLogoInputType = type;
+            const btnFile = document.getElementById('btn-logo-type-file');
+            const btnUrl = document.getElementById('btn-logo-type-url');
+            const containerFile = document.getElementById('container-logo-file');
+            const containerUrl = document.getElementById('container-logo-url');
+
+            if (type === 'file') {
+                btnFile.className = 'py-1.5 text-xs font-semibold rounded-lg bg-sky-500 text-slate-950 transition';
+                btnUrl.className = 'py-1.5 text-xs font-semibold rounded-lg text-sky-400 hover:text-sky-200 transition';
+                containerFile.classList.remove('hidden');
+                containerUrl.classList.add('hidden');
+            } else {
+                btnUrl.className = 'py-1.5 text-xs font-semibold rounded-lg bg-sky-500 text-slate-950 transition';
+                btnFile.className = 'py-1.5 text-xs font-semibold rounded-lg text-sky-400 hover:text-sky-200 transition';
+                containerUrl.classList.remove('hidden');
+                containerFile.classList.add('hidden');
+            }
+        }
+
+        function handleLogoFileUpload(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (event) {
+                    tempModalLogo = event.target.result;
+                    updateModalLogoPreview();
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function previewLogoFromUrl() {
+            const url = document.getElementById('input-logo-url').value.trim();
+            if (url) {
+                tempModalLogo = url;
+                updateModalLogoPreview();
+            }
+        }
+
+        function removeLogo() {
+            tempModalLogo = '';
+            document.getElementById('input-logo-file').value = '';
+            document.getElementById('input-logo-url').value = '';
+            updateModalLogoPreview();
+        }
+
+        function updateModalLogoPreview() {
+            const previewImg = document.getElementById('modal-logo-preview');
+            const defaultIcon = document.getElementById('modal-logo-default-icon');
+            const removeBtn = document.getElementById('btn-remove-logo');
+
+            if (tempModalLogo) {
+                previewImg.src = tempModalLogo;
+                previewImg.classList.remove('hidden');
+                defaultIcon.classList.add('hidden');
+                removeBtn.classList.remove('hidden');
+            } else {
+                previewImg.src = '';
+                previewImg.classList.add('hidden');
+                defaultIcon.classList.remove('hidden');
+                removeBtn.classList.add('hidden');
+            }
+        }
+
+        function saveHeaderData(e) {
+            e.preventDefault();
+            headerData = {
+                mainTitle: document.getElementById('input-main-title').value.trim(),
+                subtitle: document.getElementById('input-subtitle').value.trim(),
+                description: document.getElementById('input-description').value.trim(),
+                whatsapp: document.getElementById('input-whatsapp').value.trim(),
+                logo: tempModalLogo
+            };
+
+            localStorage.setItem(STORAGE_HEADER_KEY, JSON.stringify(headerData));
+            renderHeader();
+            renderProducts(document.getElementById('search-input').value);
+            closeHeaderModal();
+        }
+
+        // Product Modal Logic
+        function openProductModal(productId = null) {
+            const modalTitle = document.getElementById('product-modal-title');
+            const form = document.getElementById('product-form');
+            form.reset();
+            currentBase64Image = '';
+
+            if (productId) {
+                // Mode Edit
+                const product = products.find(p => p.id === productId);
+                if (!product) return;
+
+                modalTitle.innerHTML = '<i class="fa-solid fa-pen-to-square text-sky-400"></i> Edit Produk';
+                document.getElementById('input-product-id').value = product.id;
+                document.getElementById('input-product-title').value = product.title;
+                document.getElementById('input-product-description').value = product.description;
+                document.getElementById('input-product-price').value = product.price;
+
+                if (product.image.startsWith('data:image')) {
+                    switchImageInputType('file');
+                    currentBase64Image = product.image;
+                } else {
+                    switchImageInputType('url');
+                    document.getElementById('input-product-image-url').value = product.image;
+                }
+                previewImageSrc(product.image);
+            } else {
+                // Mode Tambah
+                modalTitle.innerHTML = '<i class="fa-solid fa-box-archive text-sky-400"></i> Tambah Produk Baru';
+                document.getElementById('input-product-id').value = '';
+                switchImageInputType('url');
+                resetPreviewImage();
+            }
+
+            document.getElementById('product-modal').classList.remove('hidden');
+        }
+
+        function closeProductModal() {
+            document.getElementById('product-modal').classList.add('hidden');
+        }
+
+        function switchImageInputType(type) {
+            currentImageType = type;
+            const btnUrl = document.getElementById('btn-img-url');
+            const btnFile = document.getElementById('btn-img-file');
+            const containerUrl = document.getElementById('container-img-url');
+            const containerFile = document.getElementById('container-img-file');
+
+            if (type === 'url') {
+                btnUrl.className = 'py-1.5 text-xs font-semibold rounded-lg bg-sky-500 text-slate-950 transition';
+                btnFile.className = 'py-1.5 text-xs font-semibold rounded-lg text-sky-400 hover:text-sky-200 transition';
+                containerUrl.classList.remove('hidden');
+                containerFile.classList.add('hidden');
+            } else {
+                btnFile.className = 'py-1.5 text-xs font-semibold rounded-lg bg-sky-500 text-slate-950 transition';
+                btnUrl.className = 'py-1.5 text-xs font-semibold rounded-lg text-sky-400 hover:text-sky-200 transition';
+                containerFile.classList.remove('hidden');
+                containerUrl.classList.add('hidden');
+            }
+        }
+
+        function handleFileUpload(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (event) {
+                    currentBase64Image = event.target.result;
+                    previewImageSrc(currentBase64Image);
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function previewImageSrc(srcOverride = null) {
+            const previewImg = document.getElementById('image-preview');
+            const placeholder = document.getElementById('preview-placeholder');
+            
+            let src = srcOverride;
+            if (!src) {
+                if (currentImageType === 'url') {
+                    src = document.getElementById('input-product-image-url').value.trim();
+                } else {
+                    src = currentBase64Image;
+                }
+            }
+
+            if (src) {
+                previewImg.src = src;
+                previewImg.classList.remove('hidden');
+                placeholder.classList.add('hidden');
+            } else {
+                resetPreviewImage();
+            }
+        }
+
+        function resetPreviewImage() {
+            const previewImg = document.getElementById('image-preview');
+            const placeholder = document.getElementById('preview-placeholder');
+            previewImg.src = '';
+            previewImg.classList.add('hidden');
+            placeholder.classList.remove('hidden');
+        }
+
+        // Save Product (Add or Edit)
+        function saveProductData(e) {
+            e.preventDefault();
+
+            const id = document.getElementById('input-product-id').value;
+            const title = document.getElementById('input-product-title').value.trim();
+            const description = document.getElementById('input-product-description').value.trim();
+            const price = parseFloat(document.getElementById('input-product-price').value);
+
+            let image = '';
+            if (currentImageType === 'url') {
+                image = document.getElementById('input-product-image-url').value.trim();
+                if (!image) {
+                    image = 'https://placehold.co/600x400/0f172a/38bdf8?text=Produk+Baru';
+                }
+            } else {
+                image = currentBase64Image || 'https://placehold.co/600x400/0f172a/38bdf8?text=Gambar+Upload';
+            }
+
+            if (id) {
+                // Update Existing
+                const index = products.findIndex(p => p.id === id);
+                if (index !== -1) {
+                    products[index] = { id, title, description, price, image };
+                }
+            } else {
+                // Add New
+                const newProduct = {
+                    id: Date.now().toString(),
+                    title,
+                    description,
+                    price,
+                    image
+                };
+                products.unshift(newProduct);
+            }
+
+            // Save to LocalStorage
+            localStorage.setItem(STORAGE_PRODUCTS_KEY, JSON.stringify(products));
+            renderProducts(document.getElementById('search-input').value);
+            closeProductModal();
+        }
+
+        // Delete Product
+        function deleteProduct(productId) {
+            if (confirm('Apakah Anda yakin ingin menghapus produk ini?')) {
+                products = products.filter(p => p.id !== productId);
+                localStorage.setItem(STORAGE_PRODUCTS_KEY, JSON.stringify(products));
+                renderProducts(document.getElementById('search-input').value);
+            }
+        }
+
+        // Helper Utility to Escape HTML (Prevent XSS)
+        function escapeHtml(str) {
+            return str
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+    </script>
+</body>
+</html>
